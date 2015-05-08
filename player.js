@@ -5,9 +5,6 @@ var opus = require('node-opus');
 var Speaker = require('speaker');
 var config = require('./config.js');
 
-
-var oggDecoder = new ogg.Decoder();
-
 var text_to_speech = watson.text_to_speech({
     username: config.TTS_USERNAME,
     password: config.TTS_PASSWORD,
@@ -19,32 +16,16 @@ var params = {
     accept: 'audio/ogg; codec=opus' //  audio/wav or audio/ogg; codec=opus
 };
 
+// ogg.Decoder detects the opus audio stream embedded in the container and emits a "stream" event with it
+// opus.Decoder decodes this stream to PCM data, and also emits a "format" event with frequency, # chanels, etc.
+// Speaker uses the format and PCM data to play audio on your system's speakers
 
-var stream = text_to_speech.synthesize(params);
-
-stream.pipe(oggDecoder);
-
-oggDecoder.on('stream', function (stream) {
-    stream.on('error', console.error.bind(console, 'oggDecoder stream error'));
-
-    var opusDecoder = new opus.Decoder({
-        channels: 1,
-        rate: 24000, // 24000Hz
-        frame_size: 480 // 20ms frame length
+text_to_speech.synthesize(params)
+    .pipe(new ogg.Decoder())
+    .on('stream', function (opusStream) {
+        opusStream.pipe(new opus.Decoder())
+            .pipe(new Speaker());
     });
-    opusDecoder.on('error', console.error.bind(console, 'opusDecoder error'));
-
-    var speaker = new Speaker({
-        channels: 1,          // # channels
-        bitDepth: 16,         // #-bit samples
-        sampleRate: 24000     // # Hz sample rate
-    });
-    speaker.on('error', console.error.bind(console, 'speaker error'));
-
-    stream.pipe(opusDecoder).pipe(speaker);
-
-
-}).on('error', console.error.bind(console, 'oggDecoder error'));
 
 
 /*

@@ -9,4 +9,6 @@ Currently requires Linux or OS X. Windows support may come in the future.
 Setup
 -----
 
-Create a watson Text to Speech instance in [Bluemix](http://bluemix.net/), bind it to a server, view the server's dashboard, and click "View Credentials" on your TTS service. Copy the username and password to `config.js`
+Create a watson Text to Speech instance in [Bluemix](http://bluemix.net/) and bind it to a server. 
+Go to the server's overview page, find your instance, and click "Show Credentials". 
+Copy the username and password to `config.js`
